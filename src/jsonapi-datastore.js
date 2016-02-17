@@ -1,18 +1,31 @@
 /**
  * @class JsonApiDataStoreModel
  */
- class JsonApiDataStoreModel {
+"use strict";
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var JsonApiDataStoreModel = (function () {
   /**
    * @method constructor
    * @param {string} type The type of the model.
    * @param {string} id The id of the model.
    */
-  constructor(type, id) {
+
+  function JsonApiDataStoreModel(type, id) {
+    _classCallCheck(this, JsonApiDataStoreModel);
+
     this.id = id;
     this._type = type;
     this._attributes = [];
     this._relationships = [];
   }
+
+  /**
+   * @class JsonApiDataStore
+   */
 
   /**
    * Serialize a model.
@@ -23,74 +36,84 @@
    *  - `{array=}` `relationships` The list of relationships to be serialized (default: all relationships).
    * @return {object} JSONAPI-compliant object
    */
-  serialize(opts) {
-    var self = this,
-        res = { data: { type: this._type } },
-        key;
 
-    opts = opts || {};
-    opts.attributes = opts.attributes || this._attributes;
-    opts.relationships = opts.relationships || this._relationships;
+  _createClass(JsonApiDataStoreModel, [{
+    key: "serialize",
+    value: function serialize(opts) {
+      var self = this,
+          res = { data: { type: this._type } },
+          key;
 
-    if (this.id !== undefined) res.data.id = this.id;
-    if (opts.attributes.length !== 0) res.data.attributes = {};
-    if (opts.relationships.length !== 0) res.data.relationships = {};
+      opts = opts || {};
+      opts.attributes = opts.attributes || this._attributes;
+      opts.relationships = opts.relationships || this._relationships;
 
-    opts.attributes.forEach(function(key) {
-      res.data.attributes[key] = self[key];
-    });
+      if (this.id !== undefined) res.data.id = this.id;
+      if (opts.attributes.length !== 0) res.data.attributes = {};
+      if (opts.relationships.length !== 0) res.data.relationships = {};
 
-    opts.relationships.forEach(function(key) {
-      function relationshipIdentifier(model) {
-        return { type: model._type, id: model.id };
-      }
-      if (!self[key]) {
-        res.data.relationships[key] = { data: null };
-      } else if (self[key].constructor === Array) {
-        res.data.relationships[key] = {
-          data: self[key].map(relationshipIdentifier)
-        };
-      } else {
-        res.data.relationships[key] = {
-          data: relationshipIdentifier(self[key])
-        };
-      }
-    });
+      opts.attributes.forEach(function (key) {
+        res.data.attributes[key] = self[key];
+      });
 
-    return res;
-  }
+      opts.relationships.forEach(function (key) {
+        function relationshipIdentifier(model) {
+          return { type: model._type, id: model.id };
+        }
+        if (!self[key]) {
+          res.data.relationships[key] = { data: null };
+        } else if (self[key].constructor === Array) {
+          res.data.relationships[key] = {
+            data: self[key].map(relationshipIdentifier)
+          };
+        } else {
+          res.data.relationships[key] = {
+            data: relationshipIdentifier(self[key])
+          };
+        }
+      });
 
-  /**
-   * Set/add an attribute to a model.
-   * @method setAttribute
-   * @param {string} attrName The name of the attribute.
-   * @param {object} value The value of the attribute.
-   */
-  setAttribute(attrName, value) {
-    if (this[attrName] === undefined) this._attributes.push(attrName);
-    this[attrName] = value;
-  }
+      return res;
+    }
 
-  /**
-   * Set/add a relationships to a model.
-   * @method setRelationship
-   * @param {string} relName The name of the relationship.
-   * @param {object} models The linked model(s).
-   */
-  setRelationship(relName, models) {
-    if (this[relName] === undefined) this._relationships.push(relName);
-    this[relName] = models;
-  }
-}
+    /**
+     * Set/add an attribute to a model.
+     * @method setAttribute
+     * @param {string} attrName The name of the attribute.
+     * @param {object} value The value of the attribute.
+     */
+  }, {
+    key: "setAttribute",
+    value: function setAttribute(attrName, value) {
+      if (this[attrName] === undefined) this._attributes.push(attrName);
+      this[attrName] = value;
+    }
 
-/**
- * @class JsonApiDataStore
- */
-class JsonApiDataStore {
+    /**
+     * Set/add a relationships to a model.
+     * @method setRelationship
+     * @param {string} relName The name of the relationship.
+     * @param {object} models The linked model(s).
+     */
+  }, {
+    key: "setRelationship",
+    value: function setRelationship(relName, models) {
+      if (this[relName] === undefined) this._relationships.push(relName);
+      this[relName] = models;
+    }
+  }]);
+
+  return JsonApiDataStoreModel;
+})();
+
+var JsonApiDataStore = (function () {
   /**
    * @method constructor
    */
-  constructor() {
+
+  function JsonApiDataStore() {
+    _classCallCheck(this, JsonApiDataStore);
+
     this.graph = {};
   }
 
@@ -99,77 +122,132 @@ class JsonApiDataStore {
    * @method destroy
    * @param {object} model The model to destroy.
    */
-  destroy(model) {
-    delete this.graph[model._type][model.id];
-  }
 
-  /**
-   * Retrieve a model by type and id. Constant-time lookup.
-   * @method find
-   * @param {string} type The type of the model.
-   * @param {string} id The id of the model.
-   * @return {object} The corresponding model if present, and null otherwise.
-   */
-  find(type, id) {
-    if (!this.graph[type] || !this.graph[type][id]) return null;
-    return this.graph[type][id];
-  }
+  _createClass(JsonApiDataStore, [{
+    key: "destroy",
+    value: function destroy(model) {
+      delete this.graph[model._type][model.id];
+    }
 
-  /**
-   * Retrieve all models by type.
-   * @method findAll
-   * @param {string} type The type of the model.
-   * @return {object} Array of the corresponding model if present, and empty array otherwise.
-   */
-  findAll(type) {
-    var self = this;
+    /**
+     * Retrieve a model by type and id. Constant-time lookup.
+     * @method find
+     * @param {string} type The type of the model.
+     * @param {string} id The id of the model.
+     * @return {object} The corresponding model if present, and null otherwise.
+     */
+  }, {
+    key: "find",
+    value: function find(type, id) {
+      if (!this.graph[type] || !this.graph[type][id]) return null;
+      return this.graph[type][id];
+    }
 
-    if (!this.graph[type]) return [];
-    return Object.keys(self.graph[type]).map(function(v) { return self.graph[type][v]; });
-  }
+    /**
+     * Retrieve all models by type.
+     * @method findAll
+     * @param {string} type The type of the model.
+     * @return {object} Array of the corresponding model if present, and empty array otherwise.
+     */
+  }, {
+    key: "findAll",
+    value: function findAll(type) {
+      var self = this;
 
-  /**
-   * Empty the store.
-   * @method reset
-   */
-  reset() {
-    this.graph = {};
-  }
+      if (!this.graph[type]) return [];
+      return Object.keys(self.graph[type]).map(function (v) {
+        return self.graph[type][v];
+      });
+    }
 
-  initModel(type, id) {
-    this.graph[type] = this.graph[type] || {};
-    this.graph[type][id] = this.graph[type][id] || new JsonApiDataStoreModel(type, id);
+    /**
+     * Empty the store.
+     * @method reset
+     */
+  }, {
+    key: "reset",
+    value: function reset() {
+      this.graph = {};
+    }
+  }, {
+    key: "initModel",
+    value: function initModel(type, id) {
+      this.graph[type] = this.graph[type] || {};
+      this.graph[type][id] = this.graph[type][id] || new JsonApiDataStoreModel(type, id);
 
-    return this.graph[type][id];
-  }
+      return this.graph[type][id];
+    }
+  }, {
+    key: "syncRecord",
+    value: function syncRecord(rec) {
+      var self = this,
+          model = this.initModel(rec.type, rec.id),
+          key;
 
-  syncRecord(rec) {
-    var self = this,
-        model = this.initModel(rec.type, rec.id),
-        key;
-
-    function findOrInit(resource) {
-      if (!self.find(resource.type, resource.id)) {
-        var placeHolderModel = self.initModel(resource.type, resource.id);
-        placeHolderModel._placeHolder = true;
+      function findOrInit(resource) {
+        if (!self.find(resource.type, resource.id)) {
+          var placeHolderModel = self.initModel(resource.type, resource.id);
+          placeHolderModel._placeHolder = true;
+        }
+        return self.graph[resource.type][resource.id];
       }
-      return self.graph[resource.type][resource.id];
-    }
 
-    delete model._placeHolder;
+      delete model._placeHolder;
 
-    for (key in rec.attributes) {
-      model._attributes.push(key);
-      model[key] = rec.attributes[key];
-    }
+      for (key in rec.attributes) {
+        model._attributes.push(key);
+        model[key] = rec.attributes[key];
+      }
 
-    if (rec.relationships) {
-      for (key in rec.relationships) {
-        var rels = rec.relationships[key];
-        var max_rels = rels.length;
-        for(var x = 0;x<max_rels;x++)
-        {
-          var rel = max_rels[x];
+      if (rec.relationships) {
+        for (key in rec.relationships) {
+          var rel = rec.relationships[key];
+          /*
+           due to a probably faulty implementation on the transformer side, we need to support both methods of relationship data
+             normal and correct:
+           relationships: {
+              author: {
+                data: {
+                  type: 'user',
+                  id: 3
+                }
+              },
+              tags: {
+                data: [
+                  { type: 'tag', id: 12 },
+                  { type: 'tag', id: 74 }
+                ]
+              }
+            }
+            our faulty way:
+            relationships: {
+              author: [
+                {
+                  data: {
+                    { type: 'user', id: 3 }
+                  }
+                }
+              ],
+              tags: [
+                {
+                  data: {
+                    { type: 'tag', id: 12 },
+                  }
+                  data: {
+                    { type: 'tag', id: 12 },
+                  }
+                }
+              ]
+            }
+           */
+
+          if (Object.prototype.toString.call(rel) === '[object Array]') {
+            var corrected_rel = { data: [] };
+            for (var x = 0; x < rel.length; x++) {
+                corrected_rel.data.push(rel[x].data);
+            }
+            rel = corrected_rel;
+          }
           if (rel.data !== undefined) {
             model._relationships.push(key);
             if (rel.data === null) {
@@ -185,38 +263,44 @@ class JsonApiDataStore {
           }
         }
       }
+
+      return model;
     }
 
-    return model;
-  }
+    /**
+     * Sync a JSONAPI-compliant payload with the store and return any metadata included in the payload
+     * @method syncWithMeta
+     * @param {object} data The JSONAPI payload
+     * @return {object} The model/array of models corresponding to the payload's primary resource(s) and any metadata.
+     */
+  }, {
+    key: "syncWithMeta",
+    value: function syncWithMeta(payload) {
+      var primary = payload.data,
+          syncRecord = this.syncRecord.bind(this);
+      if (!primary) return [];
+      if (payload.included) payload.included.map(syncRecord);
+      return {
+        data: primary.constructor === Array ? primary.map(syncRecord) : syncRecord(primary),
+        meta: "meta" in payload ? payload.meta : null
+      };
+    }
 
-  /**
-   * Sync a JSONAPI-compliant payload with the store and return any metadata included in the payload
-   * @method syncWithMeta
-   * @param {object} data The JSONAPI payload
-   * @return {object} The model/array of models corresponding to the payload's primary resource(s) and any metadata.
-   */
-  syncWithMeta(payload) {
-    var primary = payload.data,
-        syncRecord = this.syncRecord.bind(this);
-    if (!primary) return [];
-    if (payload.included) payload.included.map(syncRecord);
-    return {
-      data: (primary.constructor === Array) ? primary.map(syncRecord) : syncRecord(primary),
-      meta: ("meta" in payload) ? payload.meta : null
-    };
-  }
+    /**
+     * Sync a JSONAPI-compliant payload with the store.
+     * @method sync
+     * @param {object} data The JSONAPI payload
+     * @return {object} The model/array of models corresponding to the payload's primary resource(s).
+     */
+  }, {
+    key: "sync",
+    value: function sync(payload) {
+      return this.syncWithMeta(payload).data;
+    }
+  }]);
 
-  /**
-   * Sync a JSONAPI-compliant payload with the store.
-   * @method sync
-   * @param {object} data The JSONAPI payload
-   * @return {object} The model/array of models corresponding to the payload's primary resource(s).
-   */
-  sync(payload) {
-    return this.syncWithMeta(payload).data;
-  }
-}
+  return JsonApiDataStore;
+})();
 
 if ('undefined' !== typeof module) {
   module.exports = {

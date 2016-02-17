@@ -11,6 +11,8 @@
 * **string** *type* The type of the model.
 * **string** *id* The id of the model.
 
+## JsonApiDataStore
+
 ## serialize(opts)
 
 Serialize a model.
@@ -42,8 +44,6 @@ Set/add a relationships to a model.
 
 * **string** *relName* The name of the relationship.
 * **object** *models* The linked model(s).
-
-## JsonApiDataStore
 
 ## constructor()
 
@@ -83,6 +83,45 @@ Retrieve all models by type.
 ## reset()
 
 Empty the store.
+
+## if()
+
+due to a probably faulty implementation on the transformer side, we need to support both methods of relationship data
+             normal and correct:
+           relationships: {
+              author: {
+                data: {
+                  type: 'user',
+                  id: 3
+                }
+              },
+              tags: {
+                data: [
+                  { type: 'tag', id: 12 },
+                  { type: 'tag', id: 74 }
+                ]
+              }
+            }
+            our faulty way:
+            relationships: {
+              author: [
+                {
+                  data: {
+                    { type: 'user', id: 3 }
+                  }
+                }
+              ],
+              tags: [
+                {
+                  data: {
+                    { type: 'tag', id: 12 },
+                  }
+                  data: {
+                    { type: 'tag', id: 12 },
+                  }
+                }
+              ]
+            }
 
 ## syncWithMeta(data)
 

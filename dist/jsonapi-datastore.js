@@ -3,9 +3,21 @@
  */
 "use strict";
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _createClass = (function () {
+  function defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }return function (Constructor, protoProps, staticProps) {
+    if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
+  };
+})();
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+function _classCallCheck(instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError("Cannot call a class as a function");
+  }
+}
 
 var JsonApiDataStoreModel = (function () {
   /**
@@ -202,6 +214,52 @@ var JsonApiDataStore = (function () {
       if (rec.relationships) {
         for (key in rec.relationships) {
           var rel = rec.relationships[key];
+          /*
+           due to a probably faulty implementation on the transformer side, we need to support both methods of relationship data
+             normal and correct:
+           relationships: {
+              author: {
+                data: {
+                  type: 'user',
+                  id: 3
+                }
+              },
+              tags: {
+                data: [
+                  { type: 'tag', id: 12 },
+                  { type: 'tag', id: 74 }
+                ]
+              }
+            }
+            our faulty way:
+            relationships: {
+              author: [
+                {
+                  data: {
+                    { type: 'user', id: 3 }
+                  }
+                }
+              ],
+              tags: [
+                {
+                  data: {
+                    { type: 'tag', id: 12 },
+                  }
+                  data: {
+                    { type: 'tag', id: 12 },
+                  }
+                }
+              ]
+            }
+           */
+
+          if (Object.prototype.toString.call(rel) === '[object Array]') {
+            var corrected_rel = { data: [] };
+            for (var x = 0; x < rel.length; x++) {
+              corrected_rel.data.push(rel[x].data);
+            }
+            rel = corrected_rel;
+          }
           if (rel.data !== undefined) {
             model._relationships.push(key);
             if (rel.data === null) {

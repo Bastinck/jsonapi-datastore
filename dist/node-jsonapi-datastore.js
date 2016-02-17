@@ -231,6 +231,54 @@
         if (rec.relationships) {
           for (key in rec.relationships) {
             var rel = rec.relationships[key];
+            /*
+             due to a probably faulty implementation on the transformer side, we need to support both methods of relationship data
+               normal and correct:
+             relationships: {
+                author: {
+                  data: {
+                    type: 'user',
+                    id: 3
+                  }
+                },
+                tags: {
+                  data: [
+                    { type: 'tag', id: 12 },
+                    { type: 'tag', id: 74 }
+                  ]
+                }
+              }
+              our faulty way:
+              relationships: {
+                author: [
+                  {
+                    data: {
+                      { type: 'user', id: 3 }
+                    }
+                  }
+                ],
+                tags: [
+                  {
+                    data: {
+                      { type: 'tag', id: 12 },
+                    }
+                    data: {
+                      { type: 'tag', id: 12 },
+                    }
+                  }
+                ]
+              }
+             */
+
+            if (Object.prototype.toString.call(rel) === '[object Array]') {
+              var corrected_rel = {
+                data: []
+              };
+              for (var x = 0; x < rel.length; x++) {
+                corrected_rel.data.push(rel[x].data);
+              }
+              rel = corrected_rel;
+            }
             if (rel.data !== undefined) {
               model._relationships.push(key);
               if (rel.data === null) {
@@ -285,10 +333,12 @@
     return JsonApiDataStore;
   })();
 
-  module.exports = {
-    JsonApiDataStore: JsonApiDataStore,
-    JsonApiDataStoreModel: JsonApiDataStoreModel
-  };
+  if ('undefined' !== typeof module) {
+    module.exports = {
+      JsonApiDataStore: JsonApiDataStore,
+      JsonApiDataStoreModel: JsonApiDataStoreModel
+    };
+  }
 
   exports.JsonApiDataStore = JsonApiDataStore;
   exports.JsonApiDataStoreModel = JsonApiDataStoreModel;
