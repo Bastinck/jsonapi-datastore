@@ -165,19 +165,24 @@ class JsonApiDataStore {
 
     if (rec.relationships) {
       for (key in rec.relationships) {
-        var rel = rec.relationships[key];
-        if (rel.data !== undefined) {
-          model._relationships.push(key);
-          if (rel.data === null) {
-            model[key] = null;
-          } else if (rel.data.constructor === Array) {
-            model[key] = rel.data.map(findOrInit);
-          } else {
-            model[key] = findOrInit(rel.data);
+        var rels = rec.relationships[key];
+        var max_rels = rels.length;
+        for(var x = 0;x<max_rels;x++)
+        {
+          var rel = max_rels[x];
+          if (rel.data !== undefined) {
+            model._relationships.push(key);
+            if (rel.data === null) {
+              model[key] = null;
+            } else if (rel.data.constructor === Array) {
+              model[key] = rel.data.map(findOrInit);
+            } else {
+              model[key] = findOrInit(rel.data);
+            }
           }
-        }
-        if (rel.links) {
-          console.log("Warning: Links not implemented yet.");
+          if (rel.links) {
+            console.log("Warning: Links not implemented yet.");
+          }
         }
       }
     }
